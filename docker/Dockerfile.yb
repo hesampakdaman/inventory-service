@@ -1,0 +1,5 @@
+FROM yugabytedb/yugabyte:latest
+RUN ls
+COPY docker/entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+ENTRYPOINT ["bash", "/entrypoint.sh"]
