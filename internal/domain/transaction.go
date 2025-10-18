@@ -2,9 +2,10 @@ package domain
 
 import (
 	"time"
+
+	"github.com/google/uuid"
 )
 
-// TransactionType represents the type of transaction.
 type TransactionType string
 
 const (
@@ -12,13 +13,12 @@ const (
 	Withdrawal TransactionType = "withdrawal"
 )
 
-// Transaction represents a bank transaction entity.
 type Transaction struct {
-	ID        string          `json:"id"`
-	AccountID string          `json:"account_id"`
-	Type      TransactionType `json:"type"`
-	Amount    float64         `json:"amount"`
-	Timestamp time.Time       `json:"timestamp"`
+	ID        uuid.UUID
+	AccountID string
+	Type      TransactionType
+	Amount    float64
+	Timestamp time.Time
 }
 
 func NewTransaction(accountID string, txnType TransactionType, amount float64) (Transaction, error) {

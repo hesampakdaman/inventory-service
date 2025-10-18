@@ -14,6 +14,6 @@ var GetTimeNow = func() time.Time {
 
 // GetUUID is a function that generates a UUID.
 // It can be overridden in tests to provide deterministic behavior.
-var GetUUID = func() string {
-	return uuid.NewString()
+var GetUUID = func() uuid.UUID {
+	return uuid.New()
 }

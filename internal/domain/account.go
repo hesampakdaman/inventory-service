@@ -31,7 +31,7 @@ func (a *Account) Deposit(amount float64) error {
 		return ErrInvalidAmount
 	}
 
-	if err := a.recordTransaction(Deposit, amount); err != nil {
+	if err := a.addPending(Deposit, amount); err != nil {
 		return err
 	}
 
@@ -49,7 +49,7 @@ func (a *Account) Withdraw(amount float64) error {
 		return ErrInsufficientFunds
 	}
 
-	if err := a.recordTransaction(Withdrawal, amount); err != nil {
+	if err := a.addPending(Withdrawal, amount); err != nil {
 		return err
 	}
 
@@ -74,7 +74,13 @@ func (a *Account) Transfer(to *Account, amount float64) error {
 	return nil
 }
 
-func (a *Account) recordTransaction(ttype TransactionType, amount float64) error {
+func (a *Account) PendingTransactions() []Transaction {
+	txns := a.pending
+	a.pending = nil
+	return txns
+}
+
+func (a *Account) addPending(ttype TransactionType, amount float64) error {
 	txn, err := NewTransaction(a.ID, ttype, amount)
 	if err != nil {
 		return err
@@ -82,5 +88,5 @@ func (a *Account) recordTransaction(ttype TransactionType, amount float64) error
 
 	a.pending = append(a.pending, txn)
 
-	return err
+	return nil
 }

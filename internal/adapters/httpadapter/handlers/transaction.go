@@ -34,8 +34,8 @@ func (h *httpHandler) TransferHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	if err := json.NewEncoder(w).Encode(map[string]string{
-		"withdrawal_transaction_id": fromTxn.ID,
-		"deposit_transaction_id":    toTxn.ID,
+		"withdrawal_transaction_id": fromTxn.ID.String(),
+		"deposit_transaction_id":    toTxn.ID.String(),
 	}); err != nil {
 		http.Error(w, "Failed to encode response", http.StatusInternalServerError)
 	}
