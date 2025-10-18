@@ -5,8 +5,8 @@ import (
 	"log/slog"
 	"net/http"
 
-	"github.com/hesampakdaman/banking-service/internal/adapters/httpadapter"
-	"github.com/hesampakdaman/banking-service/internal/adapters/repository"
+	"github.com/hesampakdaman/banking-service/internal/adapter/repository"
+	"github.com/hesampakdaman/banking-service/internal/adapter/rest"
 	"github.com/hesampakdaman/banking-service/internal/service"
 )
 
@@ -18,8 +18,8 @@ func main() {
 	bankService := service.NewBankService(&repo, logger)
 
 	// Initialize http server
-	mux := httpadapter.NewRouter(bankService)
-	loggedMux := httpadapter.LoggingMiddleware(mux, logger)
+	mux := rest.NewRouter(bankService)
+	loggedMux := rest.LoggingMiddleware(mux, logger)
 	server := &http.Server{
 		Addr:    ":8080",
 		Handler: loggedMux,

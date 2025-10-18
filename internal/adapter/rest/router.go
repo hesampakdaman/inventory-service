@@ -1,9 +1,9 @@
-package httpadapter
+package rest
 
 import (
 	"net/http"
 
-	"github.com/hesampakdaman/banking-service/internal/adapters/httpadapter/handlers"
+	"github.com/hesampakdaman/banking-service/internal/adapter/rest/handlers"
 	"github.com/hesampakdaman/banking-service/internal/service"
 )
 
