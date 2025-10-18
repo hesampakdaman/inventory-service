@@ -1,11 +1,11 @@
 package domain
 
-// Account represents a bank account entity.
 type Account struct {
-	ID              string  `json:"id"`
-	Owner           string  `json:"owner"`
-	Balance         float64 `json:"balance"`
-	NewTransactions []Transaction
+	ID      string
+	Owner   string
+	Balance float64
+
+	pending []Transaction
 }
 
 func NewAccount(ID string, owner string, initialBalance float64) (Account, error) {
@@ -26,64 +26,61 @@ func NewAccount(ID string, owner string, initialBalance float64) (Account, error
 	}, nil
 }
 
-func (a *Account) Deposit(amount float64) (Transaction, error) {
+func (a *Account) Deposit(amount float64) error {
 	if amount <= 0 {
-		return Transaction{}, ErrInvalidAmount
+		return ErrInvalidAmount
 	}
 
-	txn, err := a.recordTransaction(Deposit, amount)
-	if err != nil {
-		return txn, err
+	if err := a.recordTransaction(Deposit, amount); err != nil {
+		return err
 	}
 
 	a.Balance += amount
 
-	return txn, err
+	return nil
 }
 
-func (a *Account) Withdraw(amount float64) (Transaction, error) {
+func (a *Account) Withdraw(amount float64) error {
 	if amount <= 0 {
-		return Transaction{}, ErrInvalidAmount
-	}
-	if amount > a.Balance {
-		return Transaction{}, ErrInsufficientFunds
+		return ErrInvalidAmount
 	}
 
-	txn, err := a.recordTransaction(Withdrawal, amount)
-	if err != nil {
-		return txn, err
+	if amount > a.Balance {
+		return ErrInsufficientFunds
+	}
+
+	if err := a.recordTransaction(Withdrawal, amount); err != nil {
+		return err
 	}
 
 	a.Balance -= amount
 
-	return txn, err
+	return nil
 }
 
-func (a *Account) Transfer(to *Account, amount float64) (Transaction, Transaction, error) {
+func (a *Account) Transfer(to *Account, amount float64) error {
 	if a.ID == to.ID {
-		return Transaction{}, Transaction{}, ErrSelfTransfer
+		return ErrSelfTransfer
 	}
 
-	fromTxn, err := a.Withdraw(amount)
-	if err != nil {
-		return Transaction{}, Transaction{}, err
+	if err := a.Withdraw(amount); err != nil {
+		return err
 	}
 
-	toTxn, err := to.Deposit(amount)
-	if err != nil {
-		return Transaction{}, Transaction{}, err
+	if err := to.Deposit(amount); err != nil {
+		return err
 	}
 
-	return fromTxn, toTxn, nil
+	return nil
 }
 
-func (a *Account) recordTransaction(ttype TransactionType, amount float64) (Transaction, error) {
+func (a *Account) recordTransaction(ttype TransactionType, amount float64) error {
 	txn, err := NewTransaction(a.ID, ttype, amount)
 	if err != nil {
-		return txn, err
+		return err
 	}
 
-	a.NewTransactions = append(a.NewTransactions, txn)
+	a.pending = append(a.pending, txn)
 
-	return txn, err
+	return err
 }

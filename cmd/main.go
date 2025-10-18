@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/hesampakdaman/banking-service/internal/adapters/httpadapter"
-	"github.com/hesampakdaman/banking-service/internal/adapters/storage"
+	"github.com/hesampakdaman/banking-service/internal/adapters/repository"
 	"github.com/hesampakdaman/banking-service/internal/service"
 )
 
@@ -14,8 +14,8 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
 
 	// Initialize repository & service layer
-	repo := storage.NewMemoryRepository()
-	bankService := service.NewBankService(repo, logger)
+	repo := repository.Postgres{}
+	bankService := service.NewBankService(&repo, logger)
 
 	// Initialize http server
 	mux := httpadapter.NewRouter(bankService)
