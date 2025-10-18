@@ -21,7 +21,11 @@ type Transaction struct {
 	Timestamp time.Time
 }
 
-func NewTransaction(accountID string, txnType TransactionType, amount float64) (Transaction, error) {
+func NewTransaction(
+	accountID string,
+	txnType TransactionType,
+	amount float64,
+) (Transaction, error) {
 	if accountID == "" {
 		return Transaction{}, ErrInvalidAccountID
 	}

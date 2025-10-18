@@ -1,8 +1,45 @@
 services:
-  banking-service:
-    build: .
-    ports:
-      - "8080:8080"
+  postgres:
+    image: postgres:18
+    container_name: postgres
     environment:
-      - LOG_LEVEL=info
-    restart: unless-stopped
+      POSTGRES_USER: banking
+      POSTGRES_PASSWORD: banking
+      POSTGRES_DB: banking
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    command:
+      [
+        "postgres",
+        "-c", "shared_buffers=256MB",
+        "-c", "max_connections=100",
+        "-c", "fsync=on",
+        "-c", "synchronous_commit=on",
+        "-c", "wal_level=logical"
+      ]
+
+  app:
+    build: .
+    environment:
+      DATABASE_URL: postgres://banking:banking@postgres:5432/banking?sslmode=disable
+    depends_on:
+      - postgres
+    expose:
+      - "8080"
+    deploy:
+      replicas: 4
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - app
+
+
+volumes:
+  postgres_data:

@@ -1,4 +1,4 @@
-FROM golang:1.23.6
+FROM golang:1.25
 
 WORKDIR /app
 
@@ -7,8 +7,8 @@ RUN go mod download
 
 COPY . .
 
-RUN go build -o banking-service ./cmd/main.go
+RUN go build ./cmd/main.go
 
 EXPOSE 8080
 
-CMD ["./banking-service"]
+CMD ["./main"]

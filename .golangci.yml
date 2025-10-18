@@ -1,0 +1,23 @@
+version: "2"
+linters:
+  exclusions:
+    rules:
+      - path: _test\.go
+        linters:
+          - gocyclo
+          - errcheck
+          - dupl
+          - gosec
+formatters:
+  enable:
+    - gofumpt
+    - goimports
+    - golines
+  settings:
+    gofumpt:
+        module-path: github.com/hesampakdaman/banking-service
+    golines:
+        max-len: 100
+    goimports:
+      local-prefixes:
+        - github.com/hesampakdaman/banking-service

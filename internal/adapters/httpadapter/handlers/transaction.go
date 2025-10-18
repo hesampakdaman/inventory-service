@@ -25,7 +25,12 @@ func (h *httpHandler) TransferHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fromTxn, toTxn, err := h.service.Transfer(r.Context(), req.FromAccountID, req.ToAccountID, req.Amount)
+	fromTxn, toTxn, err := h.service.Transfer(
+		r.Context(),
+		req.FromAccountID,
+		req.ToAccountID,
+		req.Amount,
+	)
 	if err != nil {
 		http.Error(w, err.Error(), domainErrToStatusCode(err))
 		return

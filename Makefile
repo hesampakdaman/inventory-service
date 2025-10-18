@@ -1,10 +1,13 @@
-.PHONY: build lint run test docker-run docker-build docker-stop docker-test docker-clean
+.PHONY: build lint run test start docker-build stop docker-clean
 
 build:
 	go build -o banking-service ./cmd/main.go
 
 lint:
 	golangci-lint run
+
+fmt:
+	golangci-lint fmt
 
 run:
 	go run ./cmd/main.go
@@ -13,16 +16,13 @@ test:
 	go test ./...
 
 docker-build:
-	docker build -t banking-service .
+	docker build .
 
-docker-run:
+start:
 	docker compose up --build -d
 
-docker-stop:
+stop:
 	docker compose down
-
-docker-test:
-	docker run --rm banking-service go test ./...
 
 docker-clean:
 	docker compose down --volumes

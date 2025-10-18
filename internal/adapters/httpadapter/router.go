@@ -11,6 +11,7 @@ func NewRouter(bankService *service.BankService) *http.ServeMux {
 	handler := handlers.NewHTTPHandler(bankService)
 
 	mux := http.NewServeMux()
+
 	mux.HandleFunc("POST /accounts", handler.CreateAccountHandler)
 	mux.HandleFunc("GET /accounts/{id}", handler.GetAccountHandler)
 	mux.HandleFunc("GET /accounts", handler.ListAccountsHandler)
