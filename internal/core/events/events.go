@@ -6,15 +6,6 @@ import (
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 
-type Event interface {
-	StockAdded |
-		StockAddFailed |
-		ReservationCreated |
-		ReservationCommitted |
-		ReservationCancelled |
-		ReservationFailed
-}
-
 type StockAdded struct {
 	ProductID models.ProductID
 	RequestID uuid.UUID

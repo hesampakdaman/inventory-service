@@ -6,13 +6,6 @@ import (
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 
-type Command interface {
-	AddStock |
-		ReserveProduct |
-		CommitReservation |
-		CancelReservation
-}
-
 type AddStock struct {
 	ProductID models.ProductID
 	RequestID uuid.UUID
