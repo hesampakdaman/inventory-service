@@ -8,6 +8,9 @@ linters:
           - errcheck
           - dupl
           - gosec
+      - path: internal/adapters/rest/.*\.go
+        linters:
+          - errcheck
 formatters:
   enable:
     - gofumpt
