@@ -1,14 +1,14 @@
 package handlers
 
 import (
+	"github.com/hesampakdaman/inventory-service/internal/core/bus"
 	"github.com/hesampakdaman/inventory-service/internal/service"
 )
 
-// httpHandler handles HTTP requests for banking operations.
 type httpHandler struct {
-	service *service.Service
+	bus *bus.Bus
 }
 
 func NewHTTPHandler(service *service.Service) *httpHandler {
-	return &httpHandler{service: service}
+	return &httpHandler{}
 }

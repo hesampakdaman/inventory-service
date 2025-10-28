@@ -12,10 +12,10 @@ import (
 func main() {
 	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
 
-	bankService := service.New(nil, logger)
+	svc := service.New(nil, logger)
 
 	// Initialize http server
-	mux := rest.NewRouter(bankService)
+	mux := rest.NewRouter(svc)
 	loggedMux := rest.LoggingMiddleware(mux, logger)
 	server := &http.Server{
 		Addr:    ":8080",

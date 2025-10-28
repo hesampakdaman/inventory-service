@@ -1,12 +1,12 @@
 # Inventory Service
-_A simple RESTful API for managing bank accounts and transactions._
+_A simple RESTful API for managing inventory.
 
 ## Architecture
 This project follows a **hexagonal architecture** to maintain clear separation of concerns:
 
-- **Domain**: Core business logic and entities
+- **Domain**: Core business logic and entities.
 - **Service**: Application logic that orchestrates interactions between domain and adapters.
-- **Adapters**: External dependencies
+- **Adapters**: External dependencies.
 - **Ports**: Defines interfaces to decouple adapters from the core logic.
 
 ## Usage
