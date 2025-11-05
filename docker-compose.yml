@@ -1,22 +1,35 @@
 services:
-  yb:
-    # psql -h localhost -p 5436 -U yugabyte -d yugabyte -c "SELECT * FROM yb_servers();"
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.yb
-    environment:
-      - YUGABYTED_JOIN=${COMPOSE_PROJECT_NAME}-yb-1
-      - TSERVER_FLAGS=yb_enable_read_committed_isolation=true
-    deploy:
-      replicas: 3
-      restart_policy:
-        condition: on-failure
+  cassandra-node1:
+    image: cassandra:5.0
+    container_name: cassandra-node1
     ports:
-      - "5430-5439:5433"
-      - "7000-7009:7000"
-      - "9000-9009:9000"
-      - "15430-15439:15433"
+      - "9042:9042"
+    environment:
+      - CASSANDRA_CLUSTER_NAME=TestCluster
+      - CASSANDRA_SEEDS=cassandra-node1
     networks: [net]
+    volumes:
+      - cassandra-node1-data:/var/lib/cassandra
+
+  cassandra-node2:
+    image: cassandra:5.0
+    container_name: cassandra-node2
+    depends_on: [cassandra-node1]
+    environment:
+      - CASSANDRA_SEEDS=cassandra-node1
+    networks: [net]
+    volumes:
+      - cassandra-node2-data:/var/lib/cassandra
+
+  cassandra-node3:
+    image: cassandra:5.0
+    container_name: cassandra-node3
+    depends_on: [cassandra-node1]
+    environment:
+      - CASSANDRA_SEEDS=cassandra-node1
+    networks: [net]
+    volumes:
+      - cassandra-node3-data:/var/lib/cassandra
 
   broker:
     image: apache/kafka:latest
@@ -49,7 +62,7 @@ services:
     environment:
       DATABASE_URL: postgres://yugabyte:yugabyte@${COMPOSE_PROJECT_NAME}-yb-1:5433/yugabyte?sslmode=disable
       KAFKA_BROKER: "broker:9092"
-    depends_on: [broker, yb]
+    depends_on: [broker, cassandra-node1]
     deploy:
       replicas: 4
     networks: [net]
@@ -65,3 +78,8 @@ services:
 
 networks:
   net:
+
+volumes:
+  cassandra-node1-data:
+  cassandra-node2-data:
+  cassandra-node3-data:

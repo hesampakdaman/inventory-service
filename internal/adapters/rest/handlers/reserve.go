@@ -20,19 +20,24 @@ func (h *httpHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
 	if r.PathValue("product_id") == "" {
+		http.Error(w, "missing product_id", http.StatusBadRequest)
 		return
 	}
+
 	productID, err := uuid.Parse(r.PathValue("product_id"))
 	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var req ReserveRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	if req.Qty <= 0 {
+		http.Error(w, "Qty must be greater than zero", http.StatusBadRequest)
 		return
 	}
 
@@ -41,6 +46,6 @@ func (h *httpHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 		RequestID: req.RequestID,
 		Qty:       req.Qty,
 	}); err != nil {
-		return
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	}
 }
