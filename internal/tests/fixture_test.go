@@ -1,6 +1,8 @@
 package tests
 
 import (
+	"fmt"
+	"io"
 	"testing"
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
@@ -11,11 +13,18 @@ type Fixture struct {
 }
 
 func NewFixture(t *testing.T) Fixture {
-	session, err := cassandraDB.Session(t)
-	if err != nil {
-		t.Fatal()
+	session, sessErr := cassandraDB.Session(t)
+	if sessErr != nil {
+		logs, err := cassandraContainer.Logs(t.Context())
+		if err != nil {
+			t.Fatalf("failed to get logs: %v", err)
+		}
+		defer logs.Close()
+		buf, _ := io.ReadAll(logs)
+		fmt.Println(string(buf))
+		t.Fatalf("%s", sessErr)
 	}
-	defer t.Cleanup(func() { session.Close() })
+	t.Cleanup(func() { session.Close() })
 
 	return Fixture{
 		Session: session,
