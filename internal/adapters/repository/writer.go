@@ -35,13 +35,13 @@ func (w Writer) Save(ctx context.Context, p models.Product, req models.RequstID)
 	batch := w.session.Batch(gocql.LoggedBatch)
 
 	batch.Query(`
-        INSERT INTO inventory.products (product_id, available, reserved, title, description)
+        INSERT INTO products (product_id, available, reserved, title, description)
         VALUES (?, ?, ?, ?, ?);`,
 		p.ID.String(), p.Available, p.Reserved, p.Title, p.Description,
 	)
 	for _, r := range p.Reservations() {
 		batch.Query(`
-        INSERT INTO inventory.reservations (product_id, reservation_id, qty, state)
+        INSERT INTO reservations (product_id, reservation_id, qty, state)
         VALUES (?, ?, ?, ?);`,
 			p.ID.String(), r.ID.String(), r.Qty, r.State,
 		)
