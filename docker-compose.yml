@@ -56,9 +56,7 @@ services:
     networks: [net]
 
   app:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.app
+    build: .
     environment:
       DATABASE_URL: postgres://yugabyte:yugabyte@${COMPOSE_PROJECT_NAME}-yb-1:5433/yugabyte?sslmode=disable
       KAFKA_BROKER: "broker:9092"
