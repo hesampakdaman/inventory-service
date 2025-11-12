@@ -7,10 +7,16 @@ import (
 )
 
 type Repository interface {
+	Get(context.Context, models.ProductID) (models.Product, error)
 	GetWithReservation(
 		context.Context,
 		models.ProductID,
 		models.ReservationID,
 	) (models.Product, error)
-	Save(context.Context, models.RequstID, models.Product) error
+	Save(context.Context, models.Product, models.RequestID) error
+	GetReservation(context.Context, models.ReservationID) (models.Reservation, error)
+}
+
+type Publisher interface {
+	Publish(ctx context.Context, msg any) error
 }
