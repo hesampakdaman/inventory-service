@@ -2,8 +2,11 @@ package bus
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"reflect"
+
+	"github.com/hesampakdaman/inventory-service/internal/ports"
 )
 
 type (
@@ -11,8 +14,11 @@ type (
 	Message any
 )
 
+var ErrNoHandler = errors.New("no handler registered")
+
 type Bus struct {
-	handlers map[reflect.Type]Handler
+	handlers  map[reflect.Type]Handler
+	publisher ports.Publisher
 }
 
 func New() *Bus {
@@ -22,17 +28,21 @@ func New() *Bus {
 }
 
 func Register[M Message](b *Bus, h func(context.Context, M) error) {
-	t := reflect.TypeOf(*new(M))
-	b.handlers[t] = func(ctx context.Context, v any) error {
+	T := reflect.TypeOf(*new(M))
+	b.handlers[T] = func(ctx context.Context, v any) error {
 		return h(ctx, v.(M))
 	}
 }
 
 func (b *Bus) Handle(ctx context.Context, msg Message) error {
-	t := reflect.TypeOf(msg)
-	h, ok := b.handlers[t]
+	T := reflect.TypeOf(msg)
+	h, ok := b.handlers[T]
 	if !ok {
-		return fmt.Errorf("no handler for %T", msg)
+		return fmt.Errorf("Message type %s: %w", T, ErrNoHandler)
 	}
 	return h(ctx, msg)
+}
+
+func (b Bus) Publish(ctx context.Context, msg Message) error {
+	return b.publisher.Publish(ctx, msg)
 }
