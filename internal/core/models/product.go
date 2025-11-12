@@ -19,20 +19,29 @@ type Product struct {
 	Title       string
 	Description string
 
-	reservations map[ReservationID]Reservation
+	Res map[ReservationID]Reservation
 }
 
 func (p Product) Reservations() []Reservation {
-	out := make([]Reservation, 0, len(p.reservations))
-	for _, r := range p.reservations {
+	out := make([]Reservation, 0, len(p.Res))
+	for _, r := range p.Res {
 		out = append(out, r)
 	}
 	return out
 }
 
-func (p *Product) Reserve(qty int) (ReservationID, error) {
+func (p Product) Reservation(rID ReservationID) (Reservation, error) {
+	res, ok := p.Res[rID]
+	if !ok {
+		return Reservation{}, ErrReservationNotFound
+	}
+
+	return res, nil
+}
+
+func (p *Product) Reserve(qty int, resID ReservationID) error {
 	if p.Available < qty {
-		return ReservationID{}, fmt.Errorf(
+		return fmt.Errorf(
 			"%w: desired %d, available %d",
 			ErrInsufficientStock,
 			qty,
@@ -43,18 +52,17 @@ func (p *Product) Reserve(qty int) (ReservationID, error) {
 	p.Available -= qty
 	p.Reserved += qty
 
-	resID := ReservationID(uuid.New())
-	p.reservations[resID] = Reservation{
+	p.Res[resID] = Reservation{
 		ID:    resID,
 		Qty:   qty,
 		State: Created,
 	}
 
-	return resID, nil
+	return nil
 }
 
 func (p *Product) Commit(resID ReservationID) error {
-	res, ok := p.reservations[resID]
+	res, ok := p.Res[resID]
 	if !ok {
 		return fmt.Errorf("%w: product %s missing reservation", ErrReservationNotFound, p.ID)
 	}
@@ -66,13 +74,13 @@ func (p *Product) Commit(resID ReservationID) error {
 	p.Reserved -= res.Qty
 	res.State = Committed
 
-	p.reservations[resID] = res
+	p.Res[resID] = res
 
 	return nil
 }
 
 func (p *Product) Cancel(resID ReservationID) error {
-	res, ok := p.reservations[resID]
+	res, ok := p.Res[resID]
 	if !ok {
 		return fmt.Errorf("%w: product %s missing reservation", ErrReservationNotFound, p.ID)
 	}
@@ -85,7 +93,7 @@ func (p *Product) Cancel(resID ReservationID) error {
 	p.Reserved -= res.Qty
 	res.State = Cancelled
 
-	p.reservations[resID] = res
+	p.Res[resID] = res
 
 	return nil
 }
