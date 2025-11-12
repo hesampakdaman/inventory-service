@@ -14,7 +14,7 @@ type AddStock struct {
 
 type ReserveProduct struct {
 	ProductID models.ProductID
-	RequestID uuid.UUID
+	RequestID models.RequestID
 	Qty       int
 }
 

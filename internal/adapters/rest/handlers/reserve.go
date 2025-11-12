@@ -43,7 +43,7 @@ func (h *httpHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 
 	if err := h.bus.Handle(r.Context(), commands.ReserveProduct{
 		ProductID: models.ProductID(productID),
-		RequestID: req.RequestID,
+		RequestID: models.RequestID(req.RequestID),
 		Qty:       req.Qty,
 	}); err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)

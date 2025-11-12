@@ -12,10 +12,16 @@ type StockAdded struct {
 	Qty       int
 }
 
+type StockAddFailed struct {
+	ProductID models.ProductID
+	RequestID uuid.UUID
+	Reason    string
+}
+
 type ReservationCreated struct {
 	ReservationID models.ReservationID
 	ProductID     models.ProductID
-	RequestID     uuid.UUID
+	RequestID     models.RequestID
 	Qty           int
 }
 
@@ -32,12 +38,6 @@ type ReservationCancelled struct {
 }
 
 type ReservationFailed struct {
-	ProductID models.ProductID
-	RequestID uuid.UUID
-	Reason    string
-}
-
-type StockAddFailed struct {
 	ProductID models.ProductID
 	RequestID uuid.UUID
 	Reason    string

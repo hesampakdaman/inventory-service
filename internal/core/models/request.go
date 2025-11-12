@@ -2,8 +2,8 @@ package models
 
 import "github.com/google/uuid"
 
-type RequstID uuid.UUID
+type RequestID uuid.UUID
 
-func (r RequstID) String() string {
+func (r RequestID) String() string {
 	return uuid.UUID(r).String()
 }
