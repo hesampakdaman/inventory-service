@@ -7,7 +7,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/apache/cassandra-gocql-driver/v2"
+	gocql "github.com/apache/cassandra-gocql-driver/v2"
 	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
 	"github.com/testcontainers/testcontainers-go"
@@ -15,8 +15,10 @@ import (
 	"github.com/testcontainers/testcontainers-go/wait"
 )
 
-var cassandraDB CassandraTestDB
-var cassandraContainer *cassandra.CassandraContainer
+var (
+	cassandraDB        CassandraTestDB
+	cassandraContainer *cassandra.CassandraContainer
+)
 
 type CassandraTestDB struct {
 	cluster *gocql.ClusterConfig
