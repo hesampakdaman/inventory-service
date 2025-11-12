@@ -4,10 +4,8 @@ build:
 	go build ./cmd/main.go
 
 lint:
-	golangci-lint run
-
-fmt:
 	golangci-lint fmt
+	golangci-lint run
 
 run:
 	go run ./cmd/main.go
