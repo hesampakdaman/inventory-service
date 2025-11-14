@@ -14,7 +14,7 @@ func TestLeTest(t *testing.T) {
 	batch.Query(`
     INSERT INTO products (product_id, available, reserved, title, description)
     VALUES (?, ?, ?, ?, ?);`,
-		"1", 2, 3, "Title", "Desc",
+		"ec1d1cb2-8d12-4686-9588-bb807e65aea7", 2, 3, "Title", "Desc",
 	)
 
 	if err := batch.ExecContext(t.Context()); err != nil {

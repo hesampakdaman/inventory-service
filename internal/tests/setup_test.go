@@ -4,11 +4,13 @@ import (
 	"context"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
+	"slices"
 	"strings"
 	"testing"
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
-	"github.com/docker/go-connections/nat"
 	"github.com/google/uuid"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/cassandra"
@@ -22,8 +24,6 @@ var (
 
 type CassandraTestDB struct {
 	cluster *gocql.ClusterConfig
-	host    string
-	port    nat.Port
 }
 
 func (c CassandraTestDB) Session(t *testing.T) (*gocql.Session, error) {
@@ -55,7 +55,38 @@ func (c CassandraTestDB) Session(t *testing.T) (*gocql.Session, error) {
 		return nil, err
 	}
 
+	if err := schemaMigration(session); err != nil {
+		return nil, err
+	}
+
 	return session, nil
+}
+
+func schemaMigration(session *gocql.Session) error {
+	files, err := filepath.Glob("../../migrations/*cql")
+	if err != nil {
+		return err
+	}
+
+	slices.Sort(files)
+
+	for _, f := range files {
+		content, err := os.ReadFile(f)
+		if err != nil {
+			return err
+		}
+		for stmt := range strings.SplitSeq(string(content), ";") {
+			if len(stmt) < 2 {
+				continue
+			}
+			if err := session.Query(stmt).Exec(); err != nil {
+				return err
+			}
+
+		}
+	}
+
+	return nil
 }
 
 func TestMain(m *testing.M) {
@@ -73,8 +104,6 @@ func TestMain(m *testing.M) {
 
 	cassandraDB = CassandraTestDB{
 		cluster: gocql.NewCluster(fmt.Sprintf("%s:%s", host, port.Port())),
-		host:    host,
-		port:    port,
 	}
 
 	m.Run()
