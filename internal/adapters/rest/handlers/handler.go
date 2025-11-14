@@ -1,13 +1,13 @@
 package handlers
 
 import (
-	"github.com/hesampakdaman/inventory-service/internal/core/bus"
+	"github.com/hesampakdaman/inventory-service/internal/core/messagebus"
 )
 
 type httpHandler struct {
-	bus *bus.Bus
+	bus *messagebus.Bus
 }
 
-func NewHTTPHandler(bus *bus.Bus) *httpHandler {
+func NewHTTPHandler(bus *messagebus.Bus) *httpHandler {
 	return &httpHandler{bus}
 }

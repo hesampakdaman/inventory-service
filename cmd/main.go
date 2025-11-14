@@ -11,14 +11,14 @@ import (
 	"time"
 
 	"github.com/hesampakdaman/inventory-service/internal/adapters/rest"
-	"github.com/hesampakdaman/inventory-service/internal/core/bus"
+	"github.com/hesampakdaman/inventory-service/internal/core/messagebus"
 )
 
 func main() {
 	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
 
 	// Initialize http server
-	mux := rest.NewRouter(bus.New())
+	mux := rest.NewRouter(messagebus.New())
 	loggedMux := rest.LoggingMiddleware(mux, logger)
 	server := &http.Server{
 		Addr:    ":8080",

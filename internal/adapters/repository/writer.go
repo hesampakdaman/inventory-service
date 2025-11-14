@@ -13,6 +13,12 @@ type Writer struct {
 	session *gocql.Session
 }
 
+func NewWriterRepository(sess *gocql.Session) Writer {
+	return Writer{
+		session: sess,
+	}
+}
+
 func (w Writer) Get(ctx context.Context, id models.ProductID) (models.Product, error) {
 	var (
 		available   int

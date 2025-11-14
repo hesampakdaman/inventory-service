@@ -3,16 +3,26 @@ package tests
 import (
 	"fmt"
 	"io"
+	"log/slog"
+	"net/http/httptest"
+	"os"
 	"testing"
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
+
+	"github.com/hesampakdaman/inventory-service/internal/app"
 )
 
 type Fixture struct {
 	Session *gocql.Session
+	App     *app.App
 }
 
 func NewFixture(t *testing.T) Fixture {
+	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+
 	session, sessErr := cassandraDB.Session(t)
 	if sessErr != nil {
 		logs, err := cassandraContainer.Logs(t.Context())
@@ -26,7 +36,13 @@ func NewFixture(t *testing.T) Fixture {
 	}
 	t.Cleanup(func() { session.Close() })
 
+	application := app.New(logger, session)
+
+	server := httptest.NewServer(application.Router)
+	t.Cleanup(server.Close)
+
 	return Fixture{
 		Session: session,
+		App:     application,
 	}
 }

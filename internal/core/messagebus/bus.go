@@ -1,4 +1,4 @@
-package bus
+package messagebus
 
 import (
 	"context"

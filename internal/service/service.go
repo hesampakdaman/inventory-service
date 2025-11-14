@@ -3,17 +3,17 @@ package service
 import (
 	"log/slog"
 
-	"github.com/hesampakdaman/inventory-service/internal/core/bus"
+	"github.com/hesampakdaman/inventory-service/internal/core/messagebus"
 	"github.com/hesampakdaman/inventory-service/internal/ports"
 )
 
 type Service struct {
 	repo   ports.Repository
 	logger *slog.Logger
-	bus    *bus.Bus
+	bus    *messagebus.Bus
 }
 
-func New(repo ports.Repository, logger *slog.Logger, bus *bus.Bus) *Service {
+func New(logger *slog.Logger, bus *messagebus.Bus, repo ports.Repository) *Service {
 	logger = logger.With("component", "Service")
 	return &Service{repo: repo, logger: logger, bus: bus}
 }
