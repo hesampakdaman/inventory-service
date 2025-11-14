@@ -30,8 +30,8 @@ func (p Product) Reservations() []Reservation {
 	return out
 }
 
-func (p Product) Reservation(rID ReservationID) (Reservation, error) {
-	res, ok := p.Res[rID]
+func (p Product) Reservation(id ReservationID) (Reservation, error) {
+	res, ok := p.Res[id]
 	if !ok {
 		return Reservation{}, ErrReservationNotFound
 	}
@@ -61,8 +61,8 @@ func (p *Product) Reserve(qty int, resID ReservationID) error {
 	return nil
 }
 
-func (p *Product) Commit(resID ReservationID) error {
-	res, ok := p.Res[resID]
+func (p *Product) Commit(rID ReservationID) error {
+	res, ok := p.Res[rID]
 	if !ok {
 		return fmt.Errorf("%w: product %s missing reservation", ErrReservationNotFound, p.ID)
 	}
@@ -74,13 +74,13 @@ func (p *Product) Commit(resID ReservationID) error {
 	p.Reserved -= res.Qty
 	res.State = Committed
 
-	p.Res[resID] = res
+	p.Res[rID] = res
 
 	return nil
 }
 
-func (p *Product) Cancel(resID ReservationID) error {
-	res, ok := p.Res[resID]
+func (p *Product) Cancel(rID ReservationID) error {
+	res, ok := p.Res[rID]
 	if !ok {
 		return fmt.Errorf("%w: product %s missing reservation", ErrReservationNotFound, p.ID)
 	}
@@ -93,7 +93,7 @@ func (p *Product) Cancel(resID ReservationID) error {
 	p.Reserved -= res.Qty
 	res.State = Cancelled
 
-	p.Res[resID] = res
+	p.Res[rID] = res
 
 	return nil
 }

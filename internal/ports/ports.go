@@ -14,7 +14,6 @@ type Repository interface {
 		models.ReservationID,
 	) (models.Product, error)
 	Save(context.Context, models.Product, models.RequestID) error
-	GetReservation(context.Context, models.ReservationID) (models.Reservation, error)
 }
 
 type Publisher interface {

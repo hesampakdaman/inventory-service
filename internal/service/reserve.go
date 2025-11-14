@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 
 	"github.com/hesampakdaman/inventory-service/internal/core/commands"
 	"github.com/hesampakdaman/inventory-service/internal/core/events"
@@ -10,22 +9,18 @@ import (
 )
 
 func (s Service) Reserve(ctx context.Context, cmd commands.ReserveProduct) error {
-	resID := models.NewReservationID(cmd.ProductID, cmd.RequestID)
+	reservationID := models.NewReservationID(cmd.ProductID, cmd.RequestID)
 
-	reservation, err := s.repo.GetReservation(ctx, resID)
-	if err == nil {
-		return s.republishReservation(ctx, reservation, cmd.RequestID)
-	}
-	if !errors.Is(err, models.ErrReservationNotFound) {
-		return err
-	}
-
-	product, err := s.repo.Get(ctx, cmd.ProductID)
+	product, err := s.repo.GetWithReservation(ctx, cmd.ProductID, reservationID)
 	if err != nil {
 		return err
 	}
 
-	if err := product.Reserve(cmd.Qty, resID); err != nil {
+	if reservation, err := product.Reservation(reservationID); err == nil {
+		return s.republishReservation(ctx, reservation, cmd.RequestID)
+	}
+
+	if err := product.Reserve(cmd.Qty, reservationID); err != nil {
 		return err
 	}
 
@@ -34,7 +29,7 @@ func (s Service) Reserve(ctx context.Context, cmd commands.ReserveProduct) error
 	}
 
 	return s.bus.Publish(ctx, events.ReservationCreated{
-		ReservationID: resID,
+		ReservationID: reservationID,
 		ProductID:     product.ID,
 		RequestID:     cmd.RequestID,
 		Qty:           cmd.Qty,
