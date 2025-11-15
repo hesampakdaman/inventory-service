@@ -135,10 +135,12 @@ func TestMain(m *testing.M) {
 
 	fmt.Printf("%v", cl)
 
-	m.Run()
+	code := m.Run()
 
 	go func() { _ = testcontainers.TerminateContainer(cassandraContainer) }()
 	go func() { _ = testcontainers.TerminateContainer(kafkaContainer) }()
+
+	os.Exit(code)
 }
 
 func must[T any](v T, err error) T {
