@@ -21,13 +21,13 @@ import (
 )
 
 var (
-	cassandraDB        CassandraTestDB
-	cassandraContainer *cassandra.CassandraContainer
-	kafkaContainer     *kafka.KafkaContainer
+	cassandraDB CassandraTestDB
+	kafkaClient *kgo.Client
 )
 
 type CassandraTestDB struct {
-	cluster *gocql.ClusterConfig
+	cluster   *gocql.ClusterConfig
+	container *cassandra.CassandraContainer
 }
 
 func (c CassandraTestDB) Session(t *testing.T) (*gocql.Session, error) {
@@ -98,46 +98,39 @@ func TestMain(m *testing.M) {
 	ctx := context.Background()
 
 	wg.Go(func() {
-		cassandraContainer = must(
-			cassandra.Run(
-				ctx,
-				"cassandra:4.1.3",
-				testcontainers.WithWaitStrategy(wait.ForLog("Starting listening for CQL clients")),
-			),
+		waitLog := wait.ForLog("Starting listening for CQL clients")
+		cassandraContainer := must(
+			cassandra.Run(ctx, "cassandra:4.1.3", testcontainers.WithWaitStrategy(waitLog)),
 		)
 		host := must(cassandraContainer.Host(ctx))
 		port := must(cassandraContainer.MappedPort(ctx, "9042/tcp"))
-
 		cassandraDB = CassandraTestDB{
-			cluster: gocql.NewCluster(fmt.Sprintf("%s:%s", host, port.Port())),
+			cluster:   gocql.NewCluster(fmt.Sprintf("%s:%s", host, port.Port())),
+			container: cassandraContainer,
 		}
 	})
 
+	var kafkaContainer *kafka.KafkaContainer
 	wg.Go(func() {
 		kafkaContainer = must(kafka.Run(ctx,
 			"confluentinc/confluent-local:7.5.0",
 			kafka.WithClusterID("test-cluster"),
-		))
+			testcontainers.WithEnv(map[string]string{
+				"KAFKA_AUTO_CREATE_TOPICS_ENABLE": "true",
+			})))
 	})
 	wg.Wait()
 
-	brokers, err := kafkaContainer.Brokers(ctx)
-	if err != nil {
-		log.Printf("failed to start container: %s", err)
-		return
-	}
-
-	cl, err := kgo.NewClient(
+	brokers := must(kafkaContainer.Brokers(ctx))
+	kafkaClient = must(kgo.NewClient(
 		kgo.SeedBrokers(brokers...),
 		kgo.ConsumerGroup("inventory-service"),
 		kgo.ConsumeTopics("inventory"),
-	)
-
-	fmt.Printf("%v", cl)
+	))
 
 	code := m.Run()
 
-	go func() { _ = testcontainers.TerminateContainer(cassandraContainer) }()
+	go func() { _ = testcontainers.TerminateContainer(cassandraDB.container) }()
 	go func() { _ = testcontainers.TerminateContainer(kafkaContainer) }()
 
 	os.Exit(code)

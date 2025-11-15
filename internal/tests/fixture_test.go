@@ -25,7 +25,7 @@ func NewFixture(t *testing.T) Fixture {
 
 	session, sessErr := cassandraDB.Session(t)
 	if sessErr != nil {
-		logs, err := cassandraContainer.Logs(t.Context())
+		logs, err := cassandraDB.container.Logs(t.Context())
 		if err != nil {
 			t.Fatalf("failed to get logs: %v", err)
 		}
@@ -36,7 +36,7 @@ func NewFixture(t *testing.T) Fixture {
 	}
 	t.Cleanup(func() { session.Close() })
 
-	application := app.New(logger, session)
+	application := app.New(logger, session, kafkaClient)
 
 	server := httptest.NewServer(application.Router)
 	t.Cleanup(server.Close)
