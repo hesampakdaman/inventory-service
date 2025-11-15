@@ -8,18 +8,22 @@ import (
 	"path/filepath"
 	"slices"
 	"strings"
+	"sync"
 	"testing"
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
 	"github.com/google/uuid"
 	"github.com/testcontainers/testcontainers-go"
 	"github.com/testcontainers/testcontainers-go/modules/cassandra"
+	"github.com/testcontainers/testcontainers-go/modules/kafka"
 	"github.com/testcontainers/testcontainers-go/wait"
+	"github.com/twmb/franz-go/pkg/kgo"
 )
 
 var (
 	cassandraDB        CassandraTestDB
 	cassandraContainer *cassandra.CassandraContainer
+	kafkaContainer     *kafka.KafkaContainer
 )
 
 type CassandraTestDB struct {
@@ -90,25 +94,51 @@ func schemaMigration(session *gocql.Session) error {
 }
 
 func TestMain(m *testing.M) {
+	var wg sync.WaitGroup
 	ctx := context.Background()
 
-	cassandraContainer = must(
-		cassandra.Run(
-			ctx,
-			"cassandra:4.1.3",
-			testcontainers.WithWaitStrategy(wait.ForLog("Starting listening for CQL clients")),
-		),
-	)
-	host := must(cassandraContainer.Host(ctx))
-	port := must(cassandraContainer.MappedPort(ctx, "9042/tcp"))
+	wg.Go(func() {
+		cassandraContainer = must(
+			cassandra.Run(
+				ctx,
+				"cassandra:4.1.3",
+				testcontainers.WithWaitStrategy(wait.ForLog("Starting listening for CQL clients")),
+			),
+		)
+		host := must(cassandraContainer.Host(ctx))
+		port := must(cassandraContainer.MappedPort(ctx, "9042/tcp"))
 
-	cassandraDB = CassandraTestDB{
-		cluster: gocql.NewCluster(fmt.Sprintf("%s:%s", host, port.Port())),
+		cassandraDB = CassandraTestDB{
+			cluster: gocql.NewCluster(fmt.Sprintf("%s:%s", host, port.Port())),
+		}
+	})
+
+	wg.Go(func() {
+		kafkaContainer = must(kafka.Run(ctx,
+			"confluentinc/confluent-local:7.5.0",
+			kafka.WithClusterID("test-cluster"),
+		))
+	})
+	wg.Wait()
+
+	brokers, err := kafkaContainer.Brokers(ctx)
+	if err != nil {
+		log.Printf("failed to start container: %s", err)
+		return
 	}
+
+	cl, err := kgo.NewClient(
+		kgo.SeedBrokers(brokers...),
+		kgo.ConsumerGroup("inventory-service"),
+		kgo.ConsumeTopics("inventory"),
+	)
+
+	fmt.Printf("%v", cl)
 
 	m.Run()
 
-	_ = testcontainers.TerminateContainer(cassandraContainer)
+	go func() { _ = testcontainers.TerminateContainer(cassandraContainer) }()
+	go func() { _ = testcontainers.TerminateContainer(kafkaContainer) }()
 }
 
 func must[T any](v T, err error) T {
