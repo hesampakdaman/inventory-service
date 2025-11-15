@@ -24,17 +24,22 @@ func NewConsumer(logger *slog.Logger, bus *messagebus.Bus, client *kgo.Client) *
 }
 
 func (c Consumer) Consume(ctx context.Context) {
-	fetches := c.client.PollFetches(ctx)
-	for _, rec := range fetches.Records() {
-		msg, err := Decode(rec.Value)
-		if err != nil {
-			c.logger.Error("decode failed", slog.Any("err", err))
-			continue
-		}
+	select {
+	case <-ctx.Done():
+		return
+	default:
+		fetches := c.client.PollFetches(ctx)
+		for _, rec := range fetches.Records() {
+			msg, err := Decode(rec.Value)
+			if err != nil {
+				c.logger.Error("decode failed", slog.Any("err", err))
+				continue
+			}
 
-		if err := c.bus.Handle(ctx, msg); err != nil {
-			c.logger.Error("handler failed", slog.Any("err", err))
-			continue
+			if err := c.bus.Handle(ctx, msg); err != nil {
+				c.logger.Error("handler failed", slog.Any("err", err))
+				continue
+			}
 		}
 	}
 }

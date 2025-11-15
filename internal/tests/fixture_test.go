@@ -37,6 +37,7 @@ func NewFixture(t *testing.T) Fixture {
 	t.Cleanup(func() { session.Close() })
 
 	application := app.New(logger, session, kafkaClient)
+	go func() { application.Consumer.Consume(t.Context()) }()
 
 	server := httptest.NewServer(application.Router)
 	t.Cleanup(server.Close)

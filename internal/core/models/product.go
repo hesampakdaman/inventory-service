@@ -12,6 +12,10 @@ func (p ProductID) String() string {
 	return uuid.UUID(p).String()
 }
 
+func (p ProductID) UUID() uuid.UUID {
+	return uuid.UUID(p)
+}
+
 type Product struct {
 	ID          ProductID
 	Available   int

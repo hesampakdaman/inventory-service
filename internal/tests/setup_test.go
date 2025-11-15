@@ -121,6 +121,18 @@ func TestMain(m *testing.M) {
 	})
 	wg.Wait()
 
+	_, _, err := kafkaContainer.Exec(ctx, []string{
+		"/usr/bin/kafka-topics",
+		"--create",
+		"--topic", "inventory",
+		"--bootstrap-server", "localhost:9092",
+		"--partitions", "1",
+		"--replication-factor", "1",
+	})
+	if err != nil {
+		panic(err)
+	}
+
 	brokers := must(kafkaContainer.Brokers(ctx))
 	kafkaClient = must(kgo.NewClient(
 		kgo.SeedBrokers(brokers...),

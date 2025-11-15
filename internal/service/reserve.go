@@ -8,7 +8,8 @@ import (
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 
-func (s Service) Reserve(ctx context.Context, cmd commands.ReserveProduct) error {
+func (s Service) Reserve(ctx context.Context, cmd *commands.ReserveProduct) error {
+	s.logger.Info("HELLO THERE")
 	reservationID := models.NewReservationID(cmd.ProductID, cmd.RequestID)
 
 	product, err := s.repo.GetWithReservation(ctx, cmd.ProductID, reservationID)
@@ -28,7 +29,7 @@ func (s Service) Reserve(ctx context.Context, cmd commands.ReserveProduct) error
 		return err
 	}
 
-	return s.bus.Publish(ctx, events.ReservationCreated{
+	return s.bus.Publish(ctx, product.ID.UUID(), "topic", events.ReservationCreated{
 		ReservationID: reservationID,
 		ProductID:     product.ID,
 		RequestID:     cmd.RequestID,
@@ -41,7 +42,7 @@ func (s Service) republishReservation(
 	r models.Reservation,
 	reqID models.RequestID,
 ) error {
-	return s.bus.Publish(ctx, events.ReservationCreated{
+	return s.bus.Publish(ctx, r.ProductID.UUID(), "topic", events.ReservationCreated{
 		ReservationID: r.ID,
 		ProductID:     r.ProductID,
 		RequestID:     reqID,

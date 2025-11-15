@@ -7,38 +7,38 @@ import (
 )
 
 type StockAdded struct {
-	ProductID models.ProductID
-	RequestID uuid.UUID
-	Qty       int
+	ProductID models.ProductID `json:"product_id"`
+	RequestID uuid.UUID        `json:"request_id"`
+	Qty       int              `json:"qty"`
 }
 
 type StockAddFailed struct {
-	ProductID models.ProductID
-	RequestID uuid.UUID
-	Reason    string
+	ProductID models.ProductID `json:"product_id"`
+	RequestID uuid.UUID        `json:"request_id"`
+	Reason    string           `json:"reason"`
 }
 
 type ReservationCreated struct {
-	ReservationID models.ReservationID
-	ProductID     models.ProductID
-	RequestID     models.RequestID
-	Qty           int
+	ReservationID models.ReservationID `json:"reservation_id"`
+	ProductID     models.ProductID     `json:"product_id"`
+	RequestID     models.RequestID     `json:"request_id"`
+	Qty           int                  `json:"qty"`
 }
 
 type ReservationCommitted struct {
-	ReservationID models.ReservationID
-	ProductID     models.ProductID
-	RequestID     uuid.UUID
+	ReservationID models.ReservationID `json:"reservation_id"`
+	ProductID     models.ProductID     `json:"product_id"`
+	RequestID     uuid.UUID            `json:"request_id"`
 }
 
 type ReservationCancelled struct {
-	ReservationID models.ReservationID
-	ProductID     models.ProductID
-	RequestID     uuid.UUID
+	ReservationID models.ReservationID `json:"reservation_id"`
+	ProductID     models.ProductID     `json:"product_id"`
+	RequestID     uuid.UUID            `json:"request_id"`
 }
 
 type ReservationFailed struct {
-	ProductID models.ProductID
-	RequestID uuid.UUID
-	Reason    string
+	ProductID models.ProductID `json:"product_id"`
+	RequestID uuid.UUID        `json:"request_id"`
+	Reason    string           `json:"reason"`
 }

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"reflect"
 
+	"github.com/google/uuid"
 	"github.com/hesampakdaman/inventory-service/internal/ports"
 )
 
@@ -17,20 +18,21 @@ type (
 var ErrNoHandler = errors.New("no handler registered")
 
 type Bus struct {
-	handlers  map[reflect.Type]Handler
-	publisher ports.Publisher
+	handlers map[reflect.Type]Handler
+	producer ports.Producer
 }
 
-func New() *Bus {
+func New(producer ports.Producer) *Bus {
 	return &Bus{
 		handlers: make(map[reflect.Type]Handler),
+		producer: producer,
 	}
 }
 
-func Register[M Message](b *Bus, h func(context.Context, M) error) {
-	T := reflect.TypeOf(*new(M))
+func Register[M Message](b *Bus, h func(context.Context, *M) error) {
+	T := reflect.TypeOf(new(M))
 	b.handlers[T] = func(ctx context.Context, v any) error {
-		return h(ctx, v.(M))
+		return h(ctx, v.(*M))
 	}
 }
 
@@ -43,6 +45,6 @@ func (b *Bus) Handle(ctx context.Context, msg Message) error {
 	return h(ctx, msg)
 }
 
-func (b Bus) Publish(ctx context.Context, msg Message) error {
-	return b.publisher.Publish(ctx, msg)
+func (b Bus) Publish(ctx context.Context, key uuid.UUID, topic string, msg Message) error {
+	return b.producer.Publish(ctx, key, topic, msg)
 }

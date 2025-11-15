@@ -24,7 +24,7 @@ func Decode(b []byte) (messagebus.Message, error) {
 	}
 
 	msg := newMsgFn()
-	if err := json.Unmarshal(env.Data, msg); err != nil {
+	if err := json.Unmarshal(env.Data, &msg); err != nil {
 		return nil, err
 	}
 

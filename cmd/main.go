@@ -18,7 +18,7 @@ func main() {
 	logger := slog.New(slog.NewTextHandler(log.Writer(), nil))
 
 	// Initialize http server
-	mux := rest.NewRouter(messagebus.New())
+	mux := rest.NewRouter(&messagebus.Bus{})
 	loggedMux := rest.LoggingMiddleware(mux, logger)
 	server := &http.Server{
 		Addr:    ":8080",
