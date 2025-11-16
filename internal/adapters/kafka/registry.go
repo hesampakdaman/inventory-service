@@ -5,5 +5,5 @@ import (
 )
 
 var registry = map[string]func() any{
-	"ReserveProduct": func() any { return &events.ReservationCreated{} },
+	"ReserveProduct": func() any { return new(events.ReservationCreated) },
 }
