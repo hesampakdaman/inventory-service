@@ -7,6 +7,7 @@ import (
 	"reflect"
 
 	"github.com/google/uuid"
+
 	"github.com/hesampakdaman/inventory-service/internal/ports"
 )
 

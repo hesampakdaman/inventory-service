@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/google/uuid"
+
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 

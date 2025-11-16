@@ -24,7 +24,11 @@ func (s Service) Reserve(ctx context.Context, cmd *commands.ReserveProduct) erro
 
 	product, err := s.repo.GetWithReservation(ctx, cmd.ProductID, resID)
 	if err != nil && !errors.Is(err, models.ErrProductNotFound) {
-		log.ErrorContext(ctx, "Failed to read product/reservation from repository.", slog.String("error", err.Error()))
+		log.ErrorContext(
+			ctx,
+			"Failed to read product/reservation from repository.",
+			slog.String("error", err.Error()),
+		)
 		return err
 	}
 
@@ -49,7 +53,11 @@ func (s Service) Reserve(ctx context.Context, cmd *commands.ReserveProduct) erro
 		RequestID:     cmd.RequestID,
 		Qty:           cmd.Qty,
 	}); err != nil {
-		log.ErrorContext(ctx, "Failed to publish ReservationCreated event.", slog.String("error", err.Error()))
+		log.ErrorContext(
+			ctx,
+			"Failed to publish ReservationCreated event.",
+			slog.String("error", err.Error()),
+		)
 		return err
 	}
 
