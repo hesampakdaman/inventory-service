@@ -31,6 +31,9 @@ func (w Writer) Get(ctx context.Context, id models.ProductID) (models.Product, e
         WHERE product_id = ?;`,
 		id.String(),
 	).ScanContext(ctx, &available, &reserved, &title, &description); err != nil {
+		if errors.Is(err, gocql.ErrNotFound) {
+			return models.Product{}, models.ErrProductNotFound
+		}
 		return models.Product{}, err
 	}
 
@@ -60,6 +63,9 @@ func (w Writer) GetWithReservation(
         WHERE product_id = ?;`,
 		productID.String(),
 	).ScanContext(ctx, &available, &reserved, &title, &description); err != nil {
+		if errors.Is(err, gocql.ErrNotFound) {
+			return models.Product{}, models.ErrProductNotFound
+		}
 		return models.Product{}, err
 	}
 	product := models.Product{
