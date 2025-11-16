@@ -15,5 +15,9 @@ type Service struct {
 
 func New(logger *slog.Logger, bus *messagebus.Bus, repo ports.Repository) *Service {
 	logger = logger.With("component", "Service")
-	return &Service{repo: repo, logger: logger, bus: bus}
+	svc := Service{repo: repo, logger: logger, bus: bus}
+
+	messagebus.Register(bus, svc.Reserve)
+
+	return &svc
 }

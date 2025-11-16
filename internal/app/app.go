@@ -25,13 +25,11 @@ type App struct {
 }
 
 func New(logger *slog.Logger, session *gocql.Session, kafkaClient *kgo.Client) *App {
-	producer := kafka.NewProducer(logger, kafkaClient)
-	bus := messagebus.New(producer)
+	bus := messagebus.New(kafka.NewProducer(logger, kafkaClient))
 
 	repo := repository.NewWriterRepository(session)
 	svc := service.New(logger, bus, repo)
 
-	messagebus.Register(bus, svc.Reserve)
 	router := rest.NewRouter(bus)
 
 	consumer := kafka.NewConsumer(logger, bus, kafkaClient)
