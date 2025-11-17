@@ -30,6 +30,7 @@ type Producer struct {
 
 func NewProducer(logger *slog.Logger, client *kgo.Client) *Producer {
 	topicMap := map[reflect.Type]Topic{
+		reflect.TypeOf(commands.CreateProduct{}):    InventoryTopic,
 		reflect.TypeOf(commands.ReserveProduct{}):   InventoryTopic,
 		reflect.TypeOf(events.ProductCreated{}):     InventoryTopic,
 		reflect.TypeOf(events.ReservationCreated{}): InventoryTopic,
