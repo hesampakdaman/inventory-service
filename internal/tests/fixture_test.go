@@ -11,11 +11,13 @@ import (
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
 
 	"github.com/hesampakdaman/inventory-service/internal/app"
+	"github.com/hesampakdaman/inventory-service/internal/core/messagebus"
 )
 
 type Fixture struct {
 	Session *gocql.Session
 	App     *app.App
+	Bus     *messagebus.Bus
 }
 
 func NewFixture(t *testing.T) Fixture {
@@ -45,5 +47,6 @@ func NewFixture(t *testing.T) Fixture {
 	return Fixture{
 		Session: session,
 		App:     application,
+		Bus:     application.Bus,
 	}
 }
