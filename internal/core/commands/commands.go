@@ -6,9 +6,17 @@ import (
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 
+type CreateProduct struct {
+	ProductID   models.ProductID
+	RequestID   models.RequestID
+	Title       string
+	Description string
+	Qty         int
+}
+
 type AddStock struct {
 	ProductID models.ProductID
-	RequestID uuid.UUID
+	RequestID models.RequestID
 	Qty       int
 }
 

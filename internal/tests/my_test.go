@@ -26,7 +26,7 @@ func TestLeTest(t *testing.T) {
 	product := models.Product{
 		ID: models.ProductID(uuid.MustParse("ec1d1cb2-8d12-4686-9588-bb807e65aea7")),
 	}
-	err := fx.App.Bus.Publish(t.Context(), product.ID.UUID(), "inventory", commands.ReserveProduct{
+	err := fx.App.Bus.Publish(t.Context(), product.ID.UUID(), commands.ReserveProduct{
 		ProductID: product.ID,
 		RequestID: models.RequestID{},
 		Qty:       1,

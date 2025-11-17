@@ -46,6 +46,6 @@ func (b *Bus) Handle(ctx context.Context, msg Message) error {
 	return h(ctx, msg)
 }
 
-func (b Bus) Publish(ctx context.Context, key uuid.UUID, topic string, msg Message) error {
-	return b.producer.Publish(ctx, key, topic, msg)
+func (b Bus) Publish(ctx context.Context, key uuid.UUID, msg Message) error {
+	return b.producer.Publish(ctx, key, msg)
 }

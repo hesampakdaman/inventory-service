@@ -8,14 +8,22 @@ import (
 
 type StockAdded struct {
 	ProductID models.ProductID `json:"product_id"`
-	RequestID uuid.UUID        `json:"request_id"`
+	RequestID models.RequestID `json:"request_id"`
 	Qty       int              `json:"qty"`
 }
 
 type StockAddFailed struct {
 	ProductID models.ProductID `json:"product_id"`
-	RequestID uuid.UUID        `json:"request_id"`
+	RequestID models.RequestID `json:"request_id"`
 	Reason    string           `json:"reason"`
+}
+
+type ProductCreated struct {
+	ProductID   models.ProductID `json:"product_id"`
+	RequestID   models.RequestID `json:"request_id"`
+	Available   int              `json:"available"`
+	Title       string           `json:"title"`
+	Description string           `json:"description"`
 }
 
 type ReservationCreated struct {
@@ -39,6 +47,6 @@ type ReservationCancelled struct {
 
 type ReservationFailed struct {
 	ProductID models.ProductID `json:"product_id"`
-	RequestID uuid.UUID        `json:"request_id"`
+	RequestID models.RequestID `json:"request_id"`
 	Reason    string           `json:"reason"`
 }

@@ -47,7 +47,7 @@ func (s Service) Reserve(ctx context.Context, cmd *commands.ReserveProduct) erro
 		return err
 	}
 
-	if err = s.bus.Publish(ctx, product.ID.UUID(), "topic", events.ReservationCreated{
+	if err = s.bus.Publish(ctx, product.ID.UUID(), events.ReservationCreated{
 		ReservationID: resID,
 		ProductID:     product.ID,
 		RequestID:     cmd.RequestID,
@@ -70,7 +70,7 @@ func (s Service) republishReservation(
 	r models.Reservation,
 	reqID models.RequestID,
 ) error {
-	return s.bus.Publish(ctx, r.ProductID.UUID(), "topic", events.ReservationCreated{
+	return s.bus.Publish(ctx, r.ProductID.UUID(), events.ReservationCreated{
 		ReservationID: r.ID,
 		ProductID:     r.ProductID,
 		RequestID:     reqID,

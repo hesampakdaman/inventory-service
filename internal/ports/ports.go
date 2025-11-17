@@ -19,5 +19,5 @@ type Repository interface {
 }
 
 type Producer interface {
-	Publish(ctx context.Context, key uuid.UUID, topic string, msg any) error
+	Publish(ctx context.Context, key uuid.UUID, msg any) error
 }
