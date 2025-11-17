@@ -106,7 +106,7 @@ func (w Writer) Save(ctx context.Context, p models.Product, req models.RequestID
         INSERT INTO requests (product_id, request_id, created_at)
         VALUES (?, ?, toTimestamp(now()))
         IF NOT EXISTS;`,
-		p.ID, req,
+		p.ID.String(), req.String(),
 	).ScanCASContext(ctx)
 	if err != nil {
 		return err
