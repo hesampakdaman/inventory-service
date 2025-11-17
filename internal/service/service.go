@@ -18,6 +18,7 @@ func New(logger *slog.Logger, bus *messagebus.Bus, repo ports.Repository) *Servi
 	svc := Service{repo: repo, logger: logger, bus: bus}
 
 	messagebus.Register(bus, svc.Reserve)
+	messagebus.Register(bus, svc.Create)
 
 	return &svc
 }
