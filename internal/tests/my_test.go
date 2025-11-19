@@ -2,6 +2,7 @@ package tests
 
 import (
 	"context"
+	"sync"
 	"testing"
 	"time"
 
@@ -52,4 +53,60 @@ func TestCreateProduct(t *testing.T) {
 
 	)
 	assert.Equal(t, expected, received)
+}
+
+func TestCreateProductIdempotent(t *testing.T) {
+	// Arrange
+	t.Parallel()
+	fx := NewFixture(t)
+
+	expected := &events.ProductCreated{
+		ProductID:   models.ProductID(uuid.MustParse("ec1d1cb2-8d12-4686-9588-bb807e65aea7")),
+		RequestID:   models.RequestID(uuid.MustParse("2b9a1a92-d280-4ca5-b420-6a2fa2413ca5")),
+		Title:       "title",
+		Description: "description",
+		Available:   1,
+	}
+
+	var (
+		mu       sync.Mutex
+		received = make([]*events.ProductCreated, 0, 2)
+	)
+	messagebus.Register(fx.Bus, func(ctx context.Context, e *events.ProductCreated) error {
+		mu.Lock()
+		received = append(received, e)
+		mu.Unlock()
+		return nil
+	})
+
+	cmd := commands.CreateProduct{
+		ProductID:   expected.ProductID,
+		RequestID:   expected.RequestID,
+		Title:       expected.Title,
+		Description: expected.Description,
+		Qty:         1,
+	}
+
+	// Act
+	require.NoError(t, fx.Bus.Publish(t.Context(), cmd.ProductID.UUID(), cmd))
+	require.NoError(t, fx.Bus.Publish(t.Context(), cmd.ProductID.UUID(), cmd))
+
+	// Assert
+	require.Eventually(t,
+		func() bool {
+			mu.Lock()
+			defer mu.Unlock()
+			return len(received) == 2
+		},
+		time.Second,         // Wait for
+		10*time.Millisecond, // Tick rate
+	)
+
+	mu.Lock()
+	defer mu.Unlock()
+
+	if assert.Len(t, received, 2) {
+		assert.Equal(t, expected, received[0])
+		assert.Equal(t, expected, received[1])
+	}
 }
