@@ -30,7 +30,7 @@ func New(logger *slog.Logger, session *gocql.Session, kafkaClient *kgo.Client) *
 	repo := repository.NewWriterRepository(session)
 	svc := service.New(logger, bus, repo)
 
-	router := rest.NewRouter(bus)
+	router := rest.NewRouter(bus, svc)
 
 	consumer := kafka.NewConsumer(logger, bus, kafkaClient)
 
