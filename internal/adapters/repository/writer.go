@@ -102,12 +102,13 @@ func (w Writer) GetWithReservation(
 }
 
 func (w Writer) Save(ctx context.Context, p models.Product, req models.RequestID) error {
+	m := make(map[string]any)
 	applied, err := w.session.Query(`
         INSERT INTO requests (product_id, request_id, created_at)
         VALUES (?, ?, toTimestamp(now()))
         IF NOT EXISTS;`,
 		p.ID.String(), req.String(),
-	).ScanCASContext(ctx)
+	).MapScanCASContext(ctx, m)
 	if err != nil {
 		return err
 	}
