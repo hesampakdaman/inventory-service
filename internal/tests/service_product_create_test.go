@@ -22,8 +22,8 @@ func TestCreateProduct(t *testing.T) {
 	fx := NewFixture(t)
 
 	expected := &events.ProductCreated{
-		ProductID:   models.ProductID(uuid.MustParse("ec1d1cb2-8d12-4686-9588-bb807e65aea7")),
-		RequestID:   models.RequestID(uuid.MustParse("2b9a1a92-d280-4ca5-b420-6a2fa2413ca5")),
+		ProductID:   models.ProductID(uuid.New()),
+		RequestID:   models.RequestID(uuid.New()),
 		Title:       "title",
 		Description: "description",
 		Available:   1,
@@ -61,8 +61,8 @@ func TestCreateProductIdempotent(t *testing.T) {
 	fx := NewFixture(t)
 
 	expected := &events.ProductCreated{
-		ProductID:   models.ProductID(uuid.MustParse("ec1d1cb2-8d12-4686-9588-bb807e65aea7")),
-		RequestID:   models.RequestID(uuid.MustParse("2b9a1a92-d280-4ca5-b420-6a2fa2413ca5")),
+		ProductID:   models.ProductID(uuid.New()),
+		RequestID:   models.RequestID(uuid.New()),
 		Title:       "title",
 		Description: "description",
 		Available:   1,
