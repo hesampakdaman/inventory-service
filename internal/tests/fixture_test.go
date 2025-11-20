@@ -10,6 +10,7 @@ import (
 
 	gocql "github.com/apache/cassandra-gocql-driver/v2"
 
+	"github.com/hesampakdaman/inventory-service/internal/adapters/kafka"
 	"github.com/hesampakdaman/inventory-service/internal/app"
 	"github.com/hesampakdaman/inventory-service/internal/core/messagebus"
 )
@@ -38,7 +39,10 @@ func NewFixture(t *testing.T) Fixture {
 	}
 	t.Cleanup(func() { session.Close() })
 
-	application := app.New(logger, session, kafkaClient)
+	kClient, topic := kafkaCluster.NewTopicClient(t)
+	t.Cleanup(func() { kClient.Close() })
+
+	application := app.New(logger, session, kClient, kafka.Topic(topic))
 	go func() { application.Consumer.Consume(t.Context()) }()
 
 	server := httptest.NewServer(application.Router)

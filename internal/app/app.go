@@ -24,8 +24,13 @@ type App struct {
 	Consumer *kafka.Consumer
 }
 
-func New(logger *slog.Logger, session *gocql.Session, kafkaClient *kgo.Client) *App {
-	bus := messagebus.New(kafka.NewProducer(logger, kafkaClient))
+func New(
+	logger *slog.Logger,
+	session *gocql.Session,
+	kafkaClient *kgo.Client,
+	topic kafka.Topic,
+) *App {
+	bus := messagebus.New(kafka.NewProducerWithTopic(logger, kafkaClient, topic))
 
 	repo := repository.NewWriterRepository(session)
 	svc := service.New(logger, bus, repo)

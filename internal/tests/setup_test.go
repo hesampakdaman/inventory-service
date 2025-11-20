@@ -21,13 +21,52 @@ import (
 )
 
 var (
-	cassandraDB CassandraTestDB
-	kafkaClient *kgo.Client
+	cassandraDB  CassandraTestDB
+	kafkaCluster KafkaTestCluster
 )
 
 type CassandraTestDB struct {
 	cluster   *gocql.ClusterConfig
 	container *cassandra.CassandraContainer
+}
+
+type KafkaTestCluster struct {
+	container *kafka.KafkaContainer
+	brokers   []string
+}
+
+func (k KafkaTestCluster) NewTopicClient(t *testing.T) (*kgo.Client, string) {
+	t.Helper()
+
+	if k.container == nil {
+		t.Fatal("kafka cluster not initialized")
+	}
+
+	ctx := t.Context()
+	topic := "inventory_" + strings.ReplaceAll(uuid.NewString(), "-", "")
+	if err := k.createTopic(ctx, topic); err != nil {
+		t.Fatalf("failed to create topic %q: %v", topic, err)
+	}
+
+	client := must(kgo.NewClient(
+		kgo.SeedBrokers(k.brokers...),
+		kgo.ConsumerGroup("inventory-service"),
+		kgo.ConsumeTopics(topic),
+	))
+
+	return client, topic
+}
+
+func (k KafkaTestCluster) createTopic(ctx context.Context, topic string) error {
+	_, _, err := k.container.Exec(ctx, []string{
+		"/usr/bin/kafka-topics",
+		"--create",
+		"--topic", topic,
+		"--bootstrap-server", "localhost:9092",
+		"--partitions", "1",
+		"--replication-factor", "1",
+	})
+	return err
 }
 
 func (c CassandraTestDB) Session(t *testing.T) (*gocql.Session, error) {
@@ -121,29 +160,16 @@ func TestMain(m *testing.M) {
 	})
 	wg.Wait()
 
-	_, _, err := kafkaContainer.Exec(ctx, []string{
-		"/usr/bin/kafka-topics",
-		"--create",
-		"--topic", "inventory",
-		"--bootstrap-server", "localhost:9092",
-		"--partitions", "1",
-		"--replication-factor", "1",
-	})
-	if err != nil {
-		panic(err)
-	}
-
 	brokers := must(kafkaContainer.Brokers(ctx))
-	kafkaClient = must(kgo.NewClient(
-		kgo.SeedBrokers(brokers...),
-		kgo.ConsumerGroup("inventory-service"),
-		kgo.ConsumeTopics("inventory"),
-	))
+	kafkaCluster = KafkaTestCluster{
+		container: kafkaContainer,
+		brokers:   brokers,
+	}
 
 	code := m.Run()
 
 	go func() { _ = testcontainers.TerminateContainer(cassandraDB.container) }()
-	go func() { _ = testcontainers.TerminateContainer(kafkaContainer) }()
+	go func() { _ = testcontainers.TerminateContainer(kafkaCluster.container) }()
 
 	os.Exit(code)
 }

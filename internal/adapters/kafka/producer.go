@@ -20,7 +20,7 @@ type Topic string
 
 var ErrTopicNotFound = errors.New("Topic not found")
 
-var InventoryTopic Topic = "inventory"
+const InventoryTopic Topic = "inventory"
 
 type Producer struct {
 	logger   *slog.Logger
@@ -29,11 +29,19 @@ type Producer struct {
 }
 
 func NewProducer(logger *slog.Logger, client *kgo.Client) *Producer {
+	return newProducer(logger, client, InventoryTopic)
+}
+
+func NewProducerWithTopic(logger *slog.Logger, client *kgo.Client, topic Topic) *Producer {
+	return newProducer(logger, client, topic)
+}
+
+func newProducer(logger *slog.Logger, client *kgo.Client, topic Topic) *Producer {
 	topicMap := map[reflect.Type]Topic{
-		reflect.TypeOf(commands.CreateProduct{}):    InventoryTopic,
-		reflect.TypeOf(commands.ReserveProduct{}):   InventoryTopic,
-		reflect.TypeOf(events.ProductCreated{}):     InventoryTopic,
-		reflect.TypeOf(events.ReservationCreated{}): InventoryTopic,
+		reflect.TypeOf(commands.CreateProduct{}):    topic,
+		reflect.TypeOf(commands.ReserveProduct{}):   topic,
+		reflect.TypeOf(events.ProductCreated{}):     topic,
+		reflect.TypeOf(events.ReservationCreated{}): topic,
 	}
 	return &Producer{logger: logger, client: client, topicMap: topicMap}
 }
