@@ -10,7 +10,7 @@ import (
 	"github.com/hesampakdaman/inventory-service/internal/core/models"
 )
 
-type availabilityResponse struct {
+type AvailabilityResponse struct {
 	ProductID uuid.UUID `json:"product_id"`
 	Available int       `json:"available"`
 }
@@ -40,7 +40,7 @@ func (h *httpHandler) GetAvailability(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(availabilityResponse{
+	if err := json.NewEncoder(w).Encode(AvailabilityResponse{
 		ProductID: productID,
 		Available: available,
 	}); err != nil {
