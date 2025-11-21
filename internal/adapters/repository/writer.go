@@ -82,7 +82,7 @@ func (w Writer) GetWithReservation(
 		state    models.ReservationState
 	)
 	if err := w.session.Query(`
-        SELECT quantity, state FROM reservations
+        SELECT qty, state FROM reservations
         WHERE product_id = ? AND reservation_id = ?;`,
 		productID.String(), reservationID.String(),
 	).ScanContext(ctx, &quantity, &state); err != nil {

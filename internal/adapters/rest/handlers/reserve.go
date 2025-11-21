@@ -19,12 +19,12 @@ type ReserveRequest struct {
 func (h *httpHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 
-	if r.PathValue("product_id") == "" {
+	if r.PathValue("id") == "" {
 		http.Error(w, "missing product_id", http.StatusBadRequest)
 		return
 	}
 
-	productID, err := uuid.Parse(r.PathValue("product_id"))
+	productID, err := uuid.Parse(r.PathValue("id"))
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
@@ -37,11 +37,11 @@ func (h *httpHandler) Reserve(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if req.Qty <= 0 {
-		http.Error(w, "Qty must be greater than zero", http.StatusBadRequest)
+		http.Error(w, "Quantity must be greater than zero", http.StatusBadRequest)
 		return
 	}
 
-	if err := h.bus.Handle(r.Context(), commands.ReserveProduct{
+	if err := h.bus.Handle(r.Context(), &commands.ReserveProduct{
 		ProductID: models.ProductID(productID),
 		RequestID: models.RequestID(req.RequestID),
 		Qty:       req.Qty,

@@ -63,43 +63,62 @@ func NewFixture(t *testing.T) Fixture {
 	}
 }
 
-func (f Fixture) DoJSON(method, path string, body any, v any) (*http.Response, error) {
+func (f Fixture) DoRequest(method, path string, body io.Reader, headers map[string]string) (*http.Response, []byte, error) {
 	if f.server == nil || f.client == nil {
-		return nil, fmt.Errorf("fixture HTTP server not initialized")
+		return nil, nil, fmt.Errorf("fixture HTTP server not initialized")
 	}
 
-	var reqBody io.Reader
-	if body != nil {
-		var buf bytes.Buffer
-		if err := json.NewEncoder(&buf).Encode(body); err != nil {
-			return nil, fmt.Errorf("failed to encode request body: %w", err)
-		}
-		reqBody = &buf
-	}
-
-	req, err := http.NewRequest(method, f.server.URL+path, reqBody)
+	req, err := http.NewRequest(method, f.server.URL+path, body)
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
 
-	req.Header.Set("Accept", "application/json")
-	if body != nil {
-		req.Header.Set("Content-Type", "application/json")
+	for k, v := range headers {
+		req.Header.Set(k, v)
 	}
 
 	resp, err := f.client.Do(req)
 	if err != nil {
-		return resp, err
+		return resp, nil, err
 	}
 	defer func() { _ = resp.Body.Close() }()
 
-	if v == nil {
-		return resp, nil
-	}
-
 	data, err := io.ReadAll(resp.Body)
 	if err != nil {
-		return resp, fmt.Errorf("failed to read response body: %w", err)
+		return resp, nil, fmt.Errorf("failed to read response body: %w", err)
+	}
+
+	return resp, data, nil
+}
+
+func (f Fixture) DoJSONRaw(method, path string, body any) (*http.Response, []byte, error) {
+	var reqBody io.Reader
+	if body != nil {
+		var buf bytes.Buffer
+		if err := json.NewEncoder(&buf).Encode(body); err != nil {
+			return nil, nil, fmt.Errorf("failed to encode request body: %w", err)
+		}
+		reqBody = &buf
+	}
+
+	headers := map[string]string{
+		"Accept": "application/json",
+	}
+	if body != nil {
+		headers["Content-Type"] = "application/json"
+	}
+
+	return f.DoRequest(method, path, reqBody, headers)
+}
+
+func (f Fixture) DoJSON(method, path string, body any, v any) (*http.Response, error) {
+	resp, data, err := f.DoJSONRaw(method, path, body)
+	if err != nil {
+		return resp, err
+	}
+
+	if v == nil {
+		return resp, nil
 	}
 
 	if err := json.Unmarshal(data, v); err != nil {
