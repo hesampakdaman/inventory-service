@@ -18,7 +18,7 @@ import (
 func TestHTTPPostReserveInvalidProductID(t *testing.T) {
 	t.Parallel()
 
-	//Arrange
+	// Arrange
 	fx := NewFixture(t)
 	payload := handlers.ReserveRequest{
 		ProductID: uuid.New(),
@@ -26,7 +26,7 @@ func TestHTTPPostReserveInvalidProductID(t *testing.T) {
 		Qty:       1,
 	}
 
-	//Act
+	// Act
 	resp, data, err := fx.DoJSONRaw(
 		http.MethodPost,
 		fmt.Sprintf("/products/%s/reserve", "not-a-uuid"),
@@ -35,7 +35,7 @@ func TestHTTPPostReserveInvalidProductID(t *testing.T) {
 	require.NoError(t, err)
 	body := strings.TrimSpace(string(data))
 
-	//Assert
+	// Assert
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Contains(t, body, "invalid UUID")
 }
@@ -43,7 +43,7 @@ func TestHTTPPostReserveInvalidProductID(t *testing.T) {
 func TestHTTPPostReserveInvalidQuantity(t *testing.T) {
 	t.Parallel()
 
-	//Arrange
+	// Arrange
 	fx := NewFixture(t)
 	productID := uuid.New()
 	payload := handlers.ReserveRequest{
@@ -52,7 +52,7 @@ func TestHTTPPostReserveInvalidQuantity(t *testing.T) {
 		Qty:       0,
 	}
 
-	//Act
+	// Act
 	resp, data, err := fx.DoJSONRaw(
 		http.MethodPost,
 		fmt.Sprintf("/products/%s/reserve", productID.String()),
@@ -61,7 +61,7 @@ func TestHTTPPostReserveInvalidQuantity(t *testing.T) {
 	require.NoError(t, err)
 	body := strings.TrimSpace(string(data))
 
-	//Assert
+	// Assert
 	assert.Equal(t, http.StatusBadRequest, resp.StatusCode)
 	assert.Equal(t, "Quantity must be greater than zero", body)
 }
@@ -69,7 +69,7 @@ func TestHTTPPostReserveInvalidQuantity(t *testing.T) {
 func TestHTTPPostReserveSuccess(t *testing.T) {
 	t.Parallel()
 
-	//Arrange
+	// Arrange
 	fx := NewFixture(t)
 	productID := models.ProductID(uuid.New())
 	createCmd := commands.CreateProduct{
@@ -86,7 +86,7 @@ func TestHTTPPostReserveSuccess(t *testing.T) {
 		Qty:       3,
 	}
 
-	//Act
+	// Act
 	resp, data, err := fx.DoJSONRaw(
 		http.MethodPost,
 		fmt.Sprintf("/products/%s/reserve", productID.String()),
@@ -95,7 +95,7 @@ func TestHTTPPostReserveSuccess(t *testing.T) {
 	require.NoError(t, err)
 	body := strings.TrimSpace(string(data))
 
-	//Assert
+	// Assert
 	assert.Equal(t, http.StatusOK, resp.StatusCode)
 	assert.Empty(t, body)
 }

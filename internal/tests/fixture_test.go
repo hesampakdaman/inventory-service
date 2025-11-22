@@ -63,7 +63,11 @@ func NewFixture(t *testing.T) Fixture {
 	}
 }
 
-func (f Fixture) DoRequest(method, path string, body io.Reader, headers map[string]string) (*http.Response, []byte, error) {
+func (f Fixture) DoRequest(
+	method, path string,
+	body io.Reader,
+	headers map[string]string,
+) (*http.Response, []byte, error) {
 	if f.server == nil || f.client == nil {
 		return nil, nil, fmt.Errorf("fixture HTTP server not initialized")
 	}

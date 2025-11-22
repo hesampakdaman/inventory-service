@@ -30,7 +30,7 @@ func TestCreateProduct(t *testing.T) {
 	}
 
 	var received *events.ProductCreated
-	messagebus.Register(fx.Bus, func(ctx context.Context, e *events.ProductCreated) error {
+	_ = messagebus.Register(fx.Bus, func(ctx context.Context, e *events.ProductCreated) error {
 		received = e
 		return nil
 	})
@@ -72,7 +72,7 @@ func TestCreateProductIdempotent(t *testing.T) {
 		mu       sync.Mutex
 		received = make([]*events.ProductCreated, 0, 2)
 	)
-	messagebus.Register(fx.Bus, func(ctx context.Context, e *events.ProductCreated) error {
+	_ = messagebus.Register(fx.Bus, func(ctx context.Context, e *events.ProductCreated) error {
 		mu.Lock()
 		received = append(received, e)
 		mu.Unlock()
